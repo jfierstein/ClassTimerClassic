@@ -1,17 +1,27 @@
+
+
+
 --[[
 Uber credits must be given to nymbia for the metatables and frames, thanks!
 ]]
---Ace2 Registering
+--Ace3 Registering
 
 ClassTimer = LibStub("AceAddon-3.0"):NewAddon("ClassTimer", "AceBucket-3.0", "AceConsole-3.0", "AceEvent-3.0")
-
 local ClassTimer = ClassTimer
-
-local AceDB = LibStub("AceDB-3.0") 
+local AceDB = LibStub("AceDB-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("ClassTimer", true)
+local DataBroker = LibStub:GetLibrary("LibDataBroker-1.1",true)
 local sm = LibStub("LibSharedMedia-3.0")
 
 local _G = _G
+local UnitAura = _G.UnitAura
+print('Initializing LCD...')
+local LCD = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and LibStub and LibStub("LibClassicDurations")
+if LCD then
+	LCD:Register("ClassTimer")
+	UnitAura = LCD.UnitAuraWrapper
+end
+print('Done Initializing LCD!')
 local unpack = _G.unpack
 local GetTime = _G.GetTime
 local table_sort = _G.table.sort
@@ -22,7 +32,7 @@ local ipairs = _G.ipairs
 local UnitIsUnit = _G.UnitIsUnit
 
 local _, enClass = UnitClass("player")
-local hasPet = enClass=="HUNTER" or enClass=="WARLOCK" and true
+local hasPet = enClass=="HUNTER" or enClass=="WARLOCK" or enClass=="DEATHKNIGHT" or enClass=="MAGE" or enClass=="SHAMAN" and true
 local unlocked = {}
 local sticky = {}
 ClassTimer.unlocked = unlocked
@@ -88,17 +98,17 @@ do
 				frame.spark:SetPoint('CENTER', frame, 'RIGHT', -sp, 0)
 			end
 		end
-		
+
 	end
 end
-do 
+do
 	local function MouseUp(bar, button)
 		if ClassTimer.db.profile.Units[bar.unit].click then
-			if button == 'RightButton' then 
-				local msg = L['%s has %s left']:format(bar.text:GetText(), bar.timetext:GetText()) 
+			if button == 'RightButton' then
+				local msg = L['%s has %s left']:format(bar.text:GetText(), bar.timetext:GetText())
 				if UnitInRaid('player') then
 					SendChatMessage(msg, 'RAID')
-				elseif GetNumPartyMembers() > 0 then
+				elseif GetNumSubgroupMembers() > 0 then
 					SendChatMessage(msg, 'PARTY')
 				end
 			end
@@ -118,7 +128,7 @@ do
 			bar.timetext = bar:CreateFontString(nil, 'OVERLAY')
 			bar.icon = bar:CreateTexture(nil, 'DIALOG')
 			bar:SetScript('OnMouseUp', MouseUp)
-			
+
 			local spark = bar:CreateTexture(nil, "OVERLAY")
 			bar.spark = spark
 			spark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
@@ -141,44 +151,45 @@ do
 end
 
 ClassTimer.defaults = {
-	profile ={
+	profile = {
 		Abilities = {},
-		Custom    = {},
 		Group     = {},
 		Sticky    = {},
-		Units     = { 
+		Units     = {
 			['**']     = {
-				enable          = true,
-				buffs           = true,
-				click           = false,
-				debuffs         = true,
-				differentColors = false,
-				growup          = false,
-				showIcons       = false,
-				icons           = true,
-				iconSide        = 'LEFT',
-				scale           = 1,
-				spacing         = 0,
-				nametext        = true,
-				timetext        = true,
-				texture         = 'Blizzard',
-				width           = 150,
-				height          = 16,
-				font            = 'Friz Quadrata TT',
-				fontsize        = 9,
-				alpha           = 1,
-				scale           = 1,
-				bartext         = '%s (%a) (%u)',
-				sizeEnable      = false,
-				sizeMax         = 5,
-				buffcolor       = {0,0.49, 1, 1},
-				Poisoncolor     = {0, 1, 0, 1},
-				Magiccolor      = {0, 0, 1, 1},
-				Diseasecolor    = {.55, .15, 0, 1},
-				Cursecolor      = {5, 0, 5, 1},
-				debuffcolor     = {1.0,0.7, 0, 1},
-				backgroundcolor = {0,0, 0, 1},
-				textcolor       = {1,1,1},
+				enable                 = true,
+				buffs                  = true,
+				click                  = false,
+				debuffs                = true,
+				differentColors        = false,
+				growup                 = false,
+				showIcons              = false,
+				icons                  = true,
+				iconSide               = 'LEFT',
+				scale                  = 1,
+				spacing                = 0,
+				nametext               = true,
+				timetext               = true,
+				texture                = 'Blizzard',
+				width                  = 150,
+				height                 = 16,
+				font                   = 'Friz Quadrata TT',
+				fontsize               = 9,
+				alpha                  = 1,
+				scale                  = 1,
+				bartext                = '%s (%a) (%u)',
+				sizeEnable             = false,
+				sizeMax                = 5,
+				buffcolor              = {0,0.49, 1, 1},
+				alwaysshownbuffcolor   = {0.35, 0.45, 0.6, 1},
+				Poisoncolor            = {0, 1, 0, 1},
+				Magiccolor             = {0, 0, 1, 1},
+				Diseasecolor           = {.55, .15, 0, 1},
+				Cursecolor             = {5, 0, 5, 1},
+				debuffcolor            = {1.0,0.7, 0, 1},
+				alwaysshowndebuffcolor = {0.5, 0.45, 0.1, 1},
+				backgroundcolor        = {0,0, 0, 1},
+				textcolor              = {1,1,1},
 			},
 			['focus']  = { click = true },
 			['sticky'] = { enable = false },
@@ -186,20 +197,32 @@ ClassTimer.defaults = {
 			['target'] = {},
 			['pet'] = {},
 		},
+	},
+	char = {
+		Custom = {},
+		AlwaysShown = {},
 	}
 }
 
- 
+
 function ClassTimer:OnInitialize()
 	--Remove Ace2 variables
 	if ClassTimerDB and ClassTimerDB.version then
 		ClassTimerDB = nil
 	end
+	if DataBroker then
+		local launcher = DataBroker:NewDataObject("ClassTimer", {
+		type = "launcher",
+		icon = "Interface\\Minimap\\Tracking\\Class",
+		OnClick = function(clickedframe, button)
+			LibStub("AceConfigDialog-3.0"):Open("ClassTimer")
+		end,
+		})
+	end
 	local validate = {}
 	local timerargs = {}
 	local table =  self:CreateTimers()
 	table['Race'] = self:Races()
-	
 	for k, v in pairs(table) do
 		for n in ipairs(v) do
 			ClassTimer.defaults.profile.Abilities[v[n]] = true
@@ -222,12 +245,19 @@ function ClassTimer:OnInitialize()
 			}
 		}
 	end
-	
 	self.db = LibStub("AceDB-3.0"):New("ClassTimerDB", self.defaults)
+	-- Move the profile-specific Custom timers to the char-specific timers on the first char you log in with
+	if self.db.profile.Custom then
+		print("ClassTimer: Custom timers have changed from being profile to character specific. The profile-specific custom timers have been copied to this characters custom timers.")
+		for k, v in pairs(self.db.profile.Custom) do
+			self.db.char.Custom[k] = k
+		end
+		self.db.profile.Custom = nil
+	end
 	self.options.args.Profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(ClassTimer.db)
 	timerargs.Spacer = {
-		type = "header", 
-		order = 1, 
+		type = "header",
+		order = 1,
 		name = L["Timers"]
 	}
 	timerargs.Extras = {
@@ -240,15 +270,37 @@ function ClassTimer:OnInitialize()
 				type = 'input',
 				name = L['Add a custom timer'],
 				get = function() return "" end,
-				set = function(_, value) self.db.profile.Custom[value] = value self.db.profile.Abilities[value] = true validate[value] = value end,
+				set = function(_, value) self.db.char.Custom[value] = value validate[value] = value end,
 				usage = L['<Spell Name in games locale>']
 			},
 			Remove = {
 				type = 'multiselect',
 				name = L['Remove a custom timer'],
 				get = function() return false end,
-				set = function(_, key) self.db.profile.Custom[key] = nil self.db.profile.Abilities[key] = nil validate[key] = nil end,
-				values = self.db.profile.Custom,
+				set = function(_, key) self.db.char.Custom[key] = nil validate[key] = nil end,
+				values = self.db.char.Custom,
+			}
+		}
+	}
+	timerargs.AlwaysShown = {
+		type = 'group',
+		name = L['AlwaysShown'],
+		desc = L['Abilities to track regardless of the caster'],
+		order = 11,
+		args = {
+			Add = {
+				type = 'input',
+				name = L['Add a timer that is always shown'],
+				get = function() return "" end,
+				set = function(_, value) self.db.char.AlwaysShown[value] = value validate[value] = value end,
+				usage = L['<Spell Name in games locale>']
+			},
+			Remove = {
+				type = 'multiselect',
+				name = L['Remove an AlwaysShown timer'],
+				get = function() return false end,
+				set = function(_, key) self.db.char.AlwaysShown[key] = nil validate[key] = nil end,
+				values = self.db.char.AlwaysShown,
 			}
 		}
 	}
@@ -256,7 +308,10 @@ function ClassTimer:OnInitialize()
 	for v in pairs(self.db.profile.Abilities) do
 		validate[v] = v
 	end
-	for v in pairs(self.db.profile.Custom) do
+	for v in pairs(self.db.char.Custom) do
+		validate[v] = v
+	end
+	for v in pairs(self.db.char.AlwaysShown) do
 		validate[v] = v
 	end
 	self.options.args.BarSettings.args.sticky.args.Sticky.args.addSticky = {
@@ -275,7 +330,7 @@ function ClassTimer:OnInitialize()
 	ClassTimer.db.RegisterCallback(self, 'OnProfileChanged', ClassTimer.ApplySettings)
 	ClassTimer.db.RegisterCallback(self, 'OnProfileCopied', ClassTimer.ApplySettings)
 	ClassTimer.db.RegisterCallback(self, 'OnProfileReset', ClassTimer.ApplySettings)
-	
+
 	sm.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mediatype, override)
 		if mediatype == 'statusbar' then
             for _, k in pairs(bars) do
@@ -291,7 +346,7 @@ function ClassTimer:OnEnable()
 	self:RegisterBucketEvent('UNIT_AURA', 0.25, 'UNIT_AURA')
 	self:RegisterEvent('PLAYER_TARGET_CHANGED')
 	self:RegisterEvent('PLAYER_FOCUS_CHANGED')
-	self:RegisterEvent('PLAYER_PET_CHANGED')
+	self:RegisterEvent('UNIT_PET')
 end
 
 function ClassTimer:OnDisable()
@@ -310,9 +365,11 @@ function ClassTimer:PLAYER_FOCUS_CHANGED()
 	self:UpdateUnitBars('focus')
 end
 
-function ClassTimer:PLAYER_PET_CHANGED()
+function ClassTimer:UNIT_PET()
 	self:UpdateUnitBars('pet')
 end
+
+
 
 function ClassTimer:UNIT_AURA(units)
 	for unit in pairs(units) do
@@ -331,7 +388,7 @@ end
 
 do
 	local function sortup(a,b)
-			return a.remaining > b.remaining
+			return  a.remaining > b.remaining
 	end
 	local function sort(a,b)
 			return a.remaining < b.remaining
@@ -346,72 +403,94 @@ do
 		else
 			str = gsub(str, '%%a', '')
 		end
-		str = gsub(str, '%s%s+', ' ') 
+		str = gsub(str, '%s%s+', ' ')
 		str = gsub(str, '%p%p+', '')
-		str = gsub(str, '%s+$', '')		
+		str = gsub(str, '%s+$', '')
 		return str
 	end
 	local tmp = {}
 	local called = false -- prevent recursive calls when new bars are created.
 	local stickyset = false
+	local whatsMine = {
+		player = true,
+		pet = true,
+		vehicle = true,
+	}
 	function ClassTimer:GetBuffs(unit, db)
 		local currentTime = GetTime()
 		if db.buffs then
-			for i = 1, 32 do
-				local name, _, texture, count, duration, remaining = UnitBuff(unit, i)
-				if not name then
+			local i=1
+			while true do
+				local name, texture, count, _, duration, endTime, caster, _, _, spellId = UnitAura(unit, i, "HELPFUL")                	
+                if not name then
 					break
 				end
-				if duration and duration > 0 and self.db.profile.Abilities[name] then
+				if caster == nil then
+					caster = player
+				end
+                local isMine = whatsMine[caster]
+				if duration and (self.db.profile.Abilities[name] or self.db.char.Custom[name]) and isMine or self.db.char.AlwaysShown[name] then
 					local t = new()
 					if self.db.profile.Units.sticky.enable and self.db.profile.Sticky[name] then
-						t.startTime = (currentTime - duration + remaining)
-						t.endTime = (currentTime + remaining)
+						t.startTime = endTime - duration
+						t.endTime = endTime
 						stickyset = true
 						t.unitname = UnitName(unit)
-						number = sticky[name..t.unitname] or #sticky+1
+						t.alwaysshown = not ismine and self.db.char.AlwaysShown[name]
+						local number = sticky[name..t.unitname] or #sticky+1
 						sticky[number] = t
 						sticky[name..t.unitname] = number
-					else
+					elseif isMine then
+						tmp[#tmp+1] = t
+					elseif self.db.char.AlwaysShown[name] then
+						t.alwaysshown = true
 						tmp[#tmp+1] = t
 					end
 					t.name = name
 					t.unit = unit
+					t.remaining = endTime-currentTime
 					t.texture = texture
 					t.duration = duration
-					t.remaining = remaining
+					t.endTime = endTime
 					t.count = count
 					t.isbuff = true
 				end
+				i=i+1
 			end
 		end
 		if db.debuffs then
-			for i = 1, 40 do
-				local name, _, texture, count, dispelType, duration, remaining = UnitDebuff(unit, i)
-				if not name then
-					break
-				end
-				if duration and duration > 0 and self.db.profile.Abilities[name] then
+			local i=1
+			while true do
+				local name, texture, count, _, duration, endTime, caster, _, _, spellId = UnitAura(unit, i, "HARMFUL")
+                if not name then break end
+                local isMine = whatsMine[caster]
+				if duration and duration > 0 and (self.db.profile.Abilities[name] or self.db.char.Custom[name]) and isMine or self.db.char.AlwaysShown[name] then
 					local t = new()
 					if self.db.profile.Units.sticky.enable and self.db.profile.Sticky[name] then
-						t.startTime = (currentTime - duration + remaining)
-						t.endTime = (currentTime + remaining)
+						t.startTime = endTime - duration
+						t.endTime = endTime
 						stickyset = true
 						t.unitname = UnitName(unit)
-						number = sticky[name..t.unitname] or #sticky+1
+						t.alwaysshown = not ismine and self.db.char.AlwaysShown[name]
+						local number = sticky[name..t.unitname] or #sticky+1
 						sticky[number] = t
 						sticky[name..t.unitname] = number
-					else
+					elseif isMine then
 						tmp[#tmp+1] = t
+					elseif self.db.char.AlwaysShown[name] then
+						t.alwaysshown = true
+						tmp[#tmp + 1] = t
 					end
 					t.name = name
 					t.unit = unit
 					t.texture = texture
 					t.duration = duration
-					t.remaining = remaining
+					t.remaining = endTime-currentTime
+					t.endTime = endTime
 					t.count = count
-					t.dispelType = dispelType
+					t.dispelType = debuffType
 				end
+				i=i+1
 			end
 		end
 	end
@@ -424,7 +503,7 @@ do
 			return
 		end
 		called = true
-		if db.enable then
+		if db.enable then						
 			local currentTime = GetTime()
 			for k in pairs(tmp) do
 				tmp[k] = del(tmp[k])
@@ -446,19 +525,17 @@ do
 				sortby = not sortby
 			end
 			table_sort(tmp, sortby and sortup or sort)
-
 			for k,v in ipairs(tmp) do
 				local bar = bars[unit][k]
-				
 				bar.text:SetText(text(db.bartext, v.name, v.count, v.unit))
 				bar.icon:SetTexture(v.texture)
-				local elapsed = (v.duration - v.remaining)
-				local startTime, endTime = (currentTime - elapsed), (currentTime + v.remaining)
+				local startTime, endTime = v.endTime - v.duration, v.endTime
 				bar.startTime = startTime
 				bar.unit = unit
 				bar.duration = v.duration
 				bar.endTime = endTime
 				bar.isbuff = v.isbuff
+				bar.alwaysshown = v.alwaysshown
 				if db.reversed then
 					bar.reversed = true
 				else
@@ -477,7 +554,9 @@ do
 					end
 				end
 				if not db.showIcons then
-					if bar.isbuff then
+					if bar.alwaysshown then
+						bar:SetStatusBarColor(unpack(bar.isbuff and db.alwaysshownbuffcolor or db.alwaysshowndebuffcolor))
+					elseif bar.isbuff then
 						bar:SetStatusBarColor(unpack(db.buffcolor))
 					elseif db.differentColors and v.dispelType then
 						bar.dispelType = v.dispelType
@@ -531,6 +610,7 @@ do
 				bar.sticky = v.sticky
 				bar.endTime = v.endTime
 				bar.isbuff = v.isbuff
+				bar.alwaysshown = v.alwaysshown
 				bar.name = v.name
 				if db.sizeEnable then
 					if bar.duration < db.sizeMax then
@@ -550,7 +630,9 @@ do
 					bar.reversed = nil
 				end
 				if not db.showIcons then
-					if bar.isbuff then
+					if bar.alwaysshown then
+						bar:SetStatusBarColor(unpack(bar.isbuff and db.alwaysshownbuffcolor or db.alwaysshowndebuffcolor))
+					elseif bar.isbuff then
 						bar:SetStatusBarColor(unpack(db.buffcolor))
 					elseif db.differentColors and v.dispelType then
 						bar.dispelType = v.dispelType
@@ -575,9 +657,9 @@ end
 do
 	local function apply(unit, i, bar, db)
 		local bars = bars[unit]
-		local showIcons = db.showIcons 
+		local showIcons = db.showIcons
 		local spacing = db.spacing
-		
+
 		bar:ClearAllPoints()
 		bar:SetStatusBarTexture(sm:Fetch('statusbar', sm.OverrideMedia.statusbar or db.texture))
 		bar:SetHeight(db.height)
@@ -600,9 +682,11 @@ do
 			bar:SetBackdropColor(1, 1, 1, 0)
 			bar.spark:Hide()
 			bar.text:SetFont(sm:Fetch('font', db.font), db.fontsize)
-		else 
+		else
 			if not db.showIcons then
-				if bar.isbuff then
+				if bar.alwaysshown then
+					bar:SetStatusBarColor(unpack(bar.isbuff and db.alwaysshownbuffcolor or db.alwaysshowndebuffcolor))
+				elseif bar.isbuff then
 					bar:SetStatusBarColor(unpack(db.buffcolor))
 				elseif db.differentColors and bar.dispelType then
 					bar:SetStatusBarColor(unpack(db[bar.dispelType..'color']))
@@ -629,14 +713,14 @@ do
 			else
 				bar:SetPoint('CENTER', UIParent)
 			end
-		else 
+		else
 			if db.growup then
 				bar:SetPoint('BOTTOMLEFT', bars[i-1], 'TOPLEFT', 0, spacing)
-			else 
+			else
 				bar:SetPoint('TOPLEFT', bars[i-1], 'BOTTOMLEFT', 0, -1 * spacing)
 			end
 		end
-		
+
 		local timetext = bar.timetext
 		if db.timetext then
 			timetext:Show()
@@ -647,14 +731,14 @@ do
 			timetext:SetTextColor(unpack(db.textcolor))
 			timetext:SetNonSpaceWrap(false)
 			timetext:ClearAllPoints()
-			timetext:SetPoint('LEFT', bar, 'LEFT', showIcons and 2 or -2, 0)
-			timetext:SetJustifyH(showIcons and 'LEFT' or 'RIGHT')
+			timetext:SetPoint('LEFT', bar, 'LEFT', showIcons and db.iconSide == 'LEFT' and 2 or -2, 0)
+			timetext:SetJustifyH(showIcons and db.iconSide == 'LEFT' and 'LEFT' or 'RIGHT')
 			bar.tt = true
 		else
 			timetext:Hide()
 			bar.tt = false
 		end
-		
+
 		local text = bar.text
 		text:SetFont(sm:Fetch('font', db.font), db.fontsize)
 		if db.nametext and not showIcons then
@@ -695,4 +779,4 @@ do
 			end
 		end
 	end
-end 
+end

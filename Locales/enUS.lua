@@ -1,4 +1,4 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("ClassTimer","enUS",true)
+local L = LibStub("AceLocale-3.0"):NewLocale("ClassTimer","enUS",true)
 
 --options
 L['Bar Settings'] = true
@@ -11,7 +11,7 @@ L['Display the AllInOne Bars this bar'] = true
 L['General'] = true
 L['Enable Buffs'] = true
 L['Show buffs'] = true
-L["Timers"] = true
+L['Timers'] = true
 L['Enable Debuffs'] = true
 L['Show debuffs'] = true
 L['Lock'] = true
@@ -66,10 +66,13 @@ L['Icon Position'] = true
 L['Set the side of the bar that the icon appears on'] = true
 L['Buff Color'] = true
 L['Set the color of the bars for buffs'] = true
+L['AlwaysShown buff Color'] = true
+L['Set the color of the bars for always shown buffs'] = true
 L['Background Color'] = true
 L['Set the color of the bars background'] = true
 L['Debuff Colors'] = true
 L['Set the color of the bars for debuffs'] = true
+L['Set the color for always shown debuffs'] = true
 L['Set color for normal'] = true
 L['Different colors'] = true
 L['Different colors for different debuffs types'] = true
@@ -85,7 +88,9 @@ L['Other abilities'] = true
 L['Add a custom timer'] = true
 L['<Spell Name in games locale>'] = true
 L['Remove a custom timer'] = true
-L['Timers'] = true
+L['Abilities to track regardless of the caster'] = true
+L['Add a timer that is always shown'] = true
+L['Remove an AlwaysShown timer'] = true
 L['%s, Drag to move'] = true
 L['Enable or disable timers'] = true
 L['Enable ClassTimer'] = true
@@ -102,6 +107,7 @@ L['DOTs'] = true
 L['Misc'] = true
 L['Talents'] = true
 L['Buffs'] = true
+L['Debuffs'] = true
 L['Feral'] = true
 L['Stings'] = true
 L['Traps'] = true
@@ -117,9 +123,11 @@ L['Poison'] = true
 L['Magic'] = true
 L['Disease'] = true
 L['Normal'] = true
+L['AlwaysShown'] = true
 L['Extras'] = true
+L['Shields'] = true
 
---Units 
+--Units
 L['target'] = true
 L['focus'] = true
 L['player'] = true

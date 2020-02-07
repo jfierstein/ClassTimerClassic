@@ -1,20 +1,25 @@
 local sm = LibStub("LibSharedMedia-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("ClassTimer", true)
 
+-- GLOBALS: ClassTimer CONFIGMODE_CALLBACKS
+
 local bars = ClassTimer.bars
 local unlocked = ClassTimer.unlocked
 
-local function dragstart()
-	this:StartMoving()
+local function dragstart(self)
+	self:StartMoving()
 end
-local function dragstop()
-	ClassTimer.db.profile.Units[this.unit].x = this:GetLeft()
-	ClassTimer.db.profile.Units[this.unit].y = this:GetBottom()
-	this:StopMovingOrSizing()
+
+local function dragstop(self)
+	ClassTimer.db.profile.Units[self.unit].x = self:GetLeft()
+	ClassTimer.db.profile.Units[self.unit].y = self:GetBottom()
+	self:StopMovingOrSizing()
 end
+
 local function getColor(info)
 	return unpack(ClassTimer.db.profile.Units[info.arg[1]][info.arg[2]])
 end
+
 local function setColor(info, ...)
 	if info.arg[1] == "general" then
 		for k in pairs(bars) do
@@ -25,7 +30,7 @@ local function setColor(info, ...)
 	ClassTimer.ApplySettings()
 end
 
-ClassTimer.options = { 
+ClassTimer.options = {
 	type = 'group',
 	icon = '',
 	name = 'ClassTimer',
@@ -84,8 +89,8 @@ ClassTimer.options = {
 			order = 3,
 			args = {
 				Spacer = {
-					type = "header", 
-					order = 1, 
+					type = "header",
+					order = 1,
 					name = L["Bar Settings"]
 				},
 				EnabledUnits = {
@@ -109,9 +114,9 @@ ClassTimer.options = {
 							name = L['Units'],
 							desc = L['Display all the buffs and debuffs on the AllInOne owner bar'],
 							get = function(_, key) return ClassTimer.db.profile.Group[key] end,
-							set = function(_, key, value) 
+							set = function(_, key, value)
 								if not ClassTimer.db.profile.AllInOneOwner then
-									ClassTimer.db.profile.AllInOneOwner = key 
+									ClassTimer.db.profile.AllInOneOwner = key
 								elseif not ClassTimer.db.profile.Group[ClassTimer.db.profile.AllInOneOwner] then
 									ClassTimer.db.profile.AllInOneOwner = key
 								end
@@ -133,6 +138,17 @@ ClassTimer.options = {
 		},
 	}
 }
+
+CONFIGMODE_CALLBACKS = CONFIGMODE_CALLBACKS or {}
+
+CONFIGMODE_CALLBACKS["ClassTimer"] = function(action, mode)
+   if action == "ON" then
+     ClassTimer.options.args.lock.set(nil, false)
+   elseif action == "OFF" then
+     ClassTimer.options.args.lock.set(nil, true)
+   end
+ end
+
 
 function ClassTimer:AddUnitOptions(type)
 	local path = ClassTimer.options.args.BarSettings
@@ -403,6 +419,16 @@ function ClassTimer:AddUnitOptions(type)
 						arg = {type, 'buffcolor'},
 						order = 4,
 					},
+					alwaysshownbuffcolor = {
+						type = 'color',
+						name = L['AlwaysShown buff Color'],
+						desc = L['Set the color of the bars for always shown buffs'],
+						get = getColor,
+						set = setColor,
+						hasAlpha = true,
+						arg = {type, 'alwaysshownbuffcolor'},
+						order = 5,
+					},
 					backgroundcolor = {
 						type = 'color',
 						name = L['Background Color'],
@@ -411,14 +437,14 @@ function ClassTimer:AddUnitOptions(type)
 						set = setColor,
 						hasAlpha = true,
 						arg = {type, 'backgroundcolor'},
-						order = 5,
+						order = 6,
 					},
 					Debuffs = {
 						type = 'group',
 						name = L['Debuff Colors'],
 						desc = L['Set the color of the bars for debuffs'],
 						inline = true,
-						order = 6,
+						order = 7,
 						args = {
 							Normal = {
 								type = 'color',
@@ -429,6 +455,16 @@ function ClassTimer:AddUnitOptions(type)
 								order = 1,
 								hasAlpha = true,
 								arg = {type, 'debuffcolor'},
+							},
+							alwaysshown = {
+								type = 'color',
+								name = L['AlwaysShown'],
+								desc = L['Set the color for always shown debuffs'],
+								get = getColor,
+								set = setColor,
+								order = 1,
+								hasAlpha = true,
+								arg = {type, 'alwaysshowndebuffcolor'},
 							},
 							differentColors = {
 								type = 'toggle',
@@ -493,9 +529,9 @@ function ClassTimer:AddUnitOptions(type)
 				args = {},
 			} or nil
 		},
-	}	
+	}
 end
-	
+
 local values = {}
 local values2 = {}
 for k in pairs(bars) do
@@ -510,4 +546,4 @@ values2['sticky'] = nil
 ClassTimer.options.args.BarSettings.args.AllInOne.args.Units.values = values2
 ClassTimer.options.args.BarSettings.args.AllInOne.args.Owner.values = values2
 local values = nil
-local values2 = nil 
+local values2 = nil

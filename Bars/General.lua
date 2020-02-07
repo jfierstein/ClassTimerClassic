@@ -1,4 +1,4 @@
-﻿local _, race = UnitRace("player")
+local _, race = UnitRace("player")
 
 function ClassTimer:Races()
 return race == "Scourge" and {
@@ -12,9 +12,9 @@ return race == "Scourge" and {
 		(GetSpellInfo(20549)), -- War Stomp --Important: Double parentheses are necessary because the last item in a table contains all the values from the function call and we only want the first one.
 	}
 	or race == "Troll" and {
-		(GetSpellInfo(20554)), -- Berserking --Important: Double parentheses are necessary because the last item in a table contains all the values from the function call and we only want the first one.
+		(GetSpellInfo(26297)), -- Berserking --Important: Double parentheses are necessary because the last item in a table contains all the values from the function call and we only want the first one.
 	}
-	or race == "Blood Elf" and {
+	or race == "BloodElf" and {
 		GetSpellInfo(25046), -- Arcane Torrent
 		(GetSpellInfo(28734)), -- Mana Tap --Important: Double parentheses are necessary because the last item in a table contains all the values from the function call and we only want the first one.
 	}
@@ -26,9 +26,6 @@ return race == "Scourge" and {
 	}
 	or race == "Draenei" and {
 		(GetSpellInfo(28880)), -- Gift of the Naaru --Important: Double parentheses are necessary because the last item in a table contains all the values from the function call and we only want the first one.
-	}
-	or race == "Human" and {
-		(GetSpellInfo(20600)), -- Perception --Important: Double parentheses are necessary because the last item in a table contains all the values from the function call and we only want the first one.
 	}
 	or {}
 end
