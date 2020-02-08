@@ -7,7 +7,7 @@ return {
 	Buffs = {
 		GetSpellInfo(1098), -- Enslave Demon
 		GetSpellInfo(1122), -- Summon Infernal
-		GetSpellInfo(17941), -- Nightfall
+		GetSpellInfo(18095), -- Nightfall
 		(GetSpellInfo(17794)), -- Shadow Vulnerability --Important: Double parentheses are necessary because the last item in a table contains all the values from the function call and we only want the first one.
 	},
 	Curses = {

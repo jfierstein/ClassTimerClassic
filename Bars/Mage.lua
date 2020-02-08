@@ -5,13 +5,9 @@ end
 function ClassTimer:CreateTimers()
 return {
 	Buffs = {
-		GetSpellInfo(30451), -- Arcane Blast
 		GetSpellInfo(66), -- Invisiblity
 		GetSpellInfo(12043), -- Presence of Mind
-		GetSpellInfo(116257), -- Invoker's Energy
-		GetSpellInfo(116011), -- Rune of Power
 		GetSpellInfo(1463), -- Incanter's Ward
-		GetSpellInfo(116267), -- Incanter's Absorbtion
 		(GetSpellInfo(30482)), -- Molten Armor --Important: Double parentheses are necessary because the last item in a table contains all the values from the function call and we only want the first one.
 	},
 	DOTs = {
@@ -21,10 +17,6 @@ return {
 		GetSpellInfo(11366), -- Pyroblast
         GetSpellInfo(92315), -- Pyroblast!
         GetSpellInfo(11129), -- Combustion
-		GetSpellInfo(132209), -- Pyromaniac
-		GetSpellInfo(114954), -- Nether Tempest
-		GetSpellInfo(113092), -- Frost Bomb
-        GetSpellInfo(44457), -- Living Bomb
 		(GetSpellInfo(11180)), -- Winter's Chill --Important: Double parentheses are necessary because the last item in a table contains all the values from the function call and we only want the first one.
 	},
 	Stuns = {
@@ -33,22 +25,15 @@ return {
 		GetSpellInfo(168), -- Frost Armor
 		GetSpellInfo(122), -- Frost Nova
 		GetSpellInfo(11071), -- Frostbite
-		GetSpellInfo(116), -- Frostbolt
-		(GetSpellInfo(11175)), -- Permafrost --Important: Double parentheses are necessary because the last item in a table contains all the values from the function call and we only want the first one.
+		(GetSpellInfo(116)), -- Frostbolt
 	},
 	Talents = {
 		GetSpellInfo(12042), -- Arcane Power
 		GetSpellInfo(12472), -- Icy Veins
-		GetSpellInfo(48108), -- Hot Streak
-        GetSpellInfo(64343), -- Impact
-		GetSpellInfo(44401), -- Missile Barrage
-		GetSpellInfo(44543), -- Fingers of Frost
-		GetSpellInfo(31589), -- Slow
-		GetSpellInfo(55342), -- Mirror Image
+        GetSpellInfo(12360), -- Impact
 		(GetSpellInfo(11255)), -- Improved Counterspell --Important: Double parentheses are necessary because the last item in a table contains all the values from the function call and we only want the first one.
 	},
 	Misc = {
-		GetSpellInfo(31641), -- Blazing Speed
 		GetSpellInfo(2139), -- Counterspell
 		GetSpellInfo(11426), -- Ice Barrier
 		GetSpellInfo(45438), -- Ice Block
